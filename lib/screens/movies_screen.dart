@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
 import '../models/channel.dart';
 import '../services/m3u_service.dart';
 import 'player_screen.dart';
@@ -15,7 +17,6 @@ class _MoviesScreenState extends State<MoviesScreen> {
       'https://va67.eu/get.php?username=VictorRian&password=14072650534&type=m3u_plus&output=ts';
 
   final M3UService service = M3UService();
-
   late Future<List<Channel>> movies;
 
   @override
@@ -73,10 +74,10 @@ class _MoviesScreenState extends State<MoviesScreen> {
           return GridView.builder(
             padding: const EdgeInsets.all(24),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4, // ideal para Android TV
+              crossAxisCount: 4, // Android TV
               crossAxisSpacing: 24,
               mainAxisSpacing: 24,
-              childAspectRatio: 0.65, // poster estilo cinema
+              childAspectRatio: 0.65,
             ),
             itemCount: list.length,
             itemBuilder: (context, index) {
@@ -93,17 +94,20 @@ class _MoviesScreenState extends State<MoviesScreen> {
                   );
                 },
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(14),
                         child: movie.logo.isNotEmpty
-                            ? Image.network(
-                                movie.logo,
+                            ? CachedNetworkImage(
+                                imageUrl: movie.logo,
                                 fit: BoxFit.cover,
                                 width: double.infinity,
-                                errorBuilder: (_, __, ___) =>
+                                height: double.infinity,
+                                placeholder: (_, __) => Container(
+                                  color: Colors.grey[900],
+                                ),
+                                errorWidget: (_, __, ___) =>
                                     _posterFallback(),
                               )
                             : _posterFallback(),
@@ -120,7 +124,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
-                    )
+                    ),
                   ],
                 ),
               );
@@ -133,8 +137,6 @@ class _MoviesScreenState extends State<MoviesScreen> {
 
   Widget _posterFallback() {
     return Container(
-      width: double.infinity,
-      height: double.infinity,
       color: Colors.grey[900],
       child: const Center(
         child: Icon(
